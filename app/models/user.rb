@@ -350,4 +350,19 @@ class User < ActiveRecord::Base
     contributors
   end
 
+  def self.create_with_omniauth(auth)
+
+    user = find_or_create_by(uid: auth['uid'], provider:  auth['provider'])
+    user.email = auth['info']['email']
+    user.password = auth['uid']
+    user.username = auth['extra']['info']['username']
+
+    if User.exists?(user)
+      user
+    else
+      user.save!
+      user
+    end
+  end
+
 end

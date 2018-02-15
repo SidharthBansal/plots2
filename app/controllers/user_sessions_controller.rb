@@ -6,6 +6,11 @@ class UserSessionsController < ApplicationController
   end
 
   def create
+    if request.env[‘omniauth.auth’]
+  user = User.create_with_omniauth(request.env['omniauth.auth'])
+  session[:user_id] = user.id
+  redirect_to user_path(user.id)
+else
     params[:user_session][:username] = params[:openid] if params[:openid] # second runthrough must preserve username
     username = params[:user_session][:username] if params[:user_session]
     @user = User.find_by(username: username)
@@ -69,6 +74,7 @@ class UserSessionsController < ApplicationController
       flash[:error] = I18n.t('user_sessions_controller.user_has_been_banned', username: @user.username).html_safe
       redirect_to '/'
     end
+  end
   end
 
   def destroy
